@@ -1,32 +1,28 @@
 global_seed: 11
 training_seed: &training_seed 11
-dataset_seed: &dataset_seed 11
+dataset_seed: &dataset_seed 16
 
 
 strategy:
-  finetuning_set: &finetuning_set 'Val'
-  noise:
+  proxy_set: &proxy_set 'Val+Subset'
+  subset_size: 1000
+  corruption:
+    proxy:
+      - set: 'Train'
+        noise_rate: 1.0
+        noise_type: 'symmetric'
+        seed: 25
+      - set: 'Train'
+        noise_rate: 1.0
+        noise_type: 'symmetric'
+        seed: 70
 
-    finetuning:
-      - set: 'Train'
-        noise_rate: 1.0
-        noise_type: 'symmetric'
-        seed: 12
-      - set: 'Train'
-        noise_rate: 1.0
-        noise_type: 'symmetric'
-        seed: 10
-      - set: 'Train'
-        noise_rate: 1.0
-        noise_type: 'symmetric'
-        seed: 14
 
 dataset:
-  name: "food101"
-  num_classes: &num_classes 101
+  name: "clothing1M"
+  num_classes: &num_classes 14
   img_size: [224, 224]
   batch_size: 256
-  val_from_test_size: 2500
   valset_ratio: 0.0
   num_workers: 12
   seed: *dataset_seed
@@ -43,48 +39,71 @@ model:
 
 
 trainer:
-  finetuning:
-    mix:
-      max_iterations: 50000  # for batch size 128
-      optimizer_cfg: 
-        type: "adamw"
-        lr: 1.0e-5
-        betas: [0.9, 0.999]
-      lr_schedule_cfg:
-        type: 'cosann_warmup'
-        update_on: 'gradient_step'
-        warmup_steps: 300
-        hold_steps: 20000
-        T_max: 50000
-        eta_min: 0
-      early_stopping: False
-      validation_freq: -1
-      save_best_model: False
-      checkpoint_freq: -1
-      run_on_gpu: True
-      use_amp: True
-      log_comet: True
-      comet_project_name: 'dino-realworld-TA'
-      seed: *training_seed
-    noise:
-      max_iterations: 8000 # this is for batch size 64 now
-      optimizer_cfg: 
-        type: "adamw"
-        lr: 1.0e-5
-        betas: [0.9, 0.999]
-      lr_schedule_cfg:
-        type: 'cosann_warmup'
-        update_on: 'gradient_step'
-        warmup_steps: 300
-        hold_steps: 4000
-        T_max: 8000
-        eta_min: 0
-      early_stopping: False
-      validation_freq: -1
-      save_best_model: False
-      checkpoint_freq: -1
-      run_on_gpu: True
-      use_amp: True
-      log_comet: True
-      comet_project_name: 'dino-realworld-TA'
-      seed: *training_seed
+  mix:
+    max_iterations: 150000
+    optimizer_cfg: 
+      type: "adamw"
+      lr: 1.0e-5
+      betas: [0.9, 0.999]
+    lr_schedule_cfg:
+      type: 'cosann_warmup'
+      update_on: 'gradient_step'
+      warmup_steps: 1000
+      hold_steps: 79000
+      T_max: 150000
+      eta_min: 0
+    early_stopping: False
+    validation_freq: -1
+    save_best_model: False
+    checkpoint_freq: -1
+    run_on_gpu: True
+    use_amp: True
+    log_comet: True
+    comet_project_name: 'dino-realworld-TA'
+    seed: *training_seed
+  proxy:
+    max_iterations: 500
+    optimizer_cfg: 
+      type: "adamw"
+      lr: 1.0e-5
+      betas: [0.9, 0.999]
+    lr_schedule_cfg:
+      type: 'cosann_warmup'
+      update_on: 'gradient_step'
+      warmup_steps: 100
+      hold_steps: 300
+      T_max: 500
+      eta_min: 0
+    early_stopping: False
+    validation_freq: -1
+    save_best_model: False
+    checkpoint_freq: -1
+    run_on_gpu: True
+    use_amp: True
+    log_comet: True
+    comet_project_name: 'dino-realworld-TA'
+    seed: *training_seed
+
+
+  CF:
+    max_iterations: 500
+    optimizer_cfg: 
+      type: "adamw" 
+      lr: 1.0e-5
+      betas: [0.9, 0.999]
+    lr_schedule_cfg:
+      type: 'cosann_warmup'
+      update_on: 'gradient_step'
+      warmup_steps: 100
+      hold_steps: 200
+      T_max: 500
+      eta_min: 0
+    early_stopping: False
+    validation_freq: -1
+    save_best_model: False
+    checkpoint_freq: -1
+    run_on_gpu: True
+    use_amp: True
+    log_comet: True
+    comet_project_name: 'dino-realworld-TA'
+    seed: *training_seed

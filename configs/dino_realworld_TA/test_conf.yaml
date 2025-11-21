@@ -1,6 +1,6 @@
 global_seed: 11
 training_seed: &training_seed 11
-dataset_seed: &dataset_seed 5
+dataset_seed: &dataset_seed 15
 
 
 strategy:
@@ -11,18 +11,18 @@ strategy:
       - set: 'Train'
         noise_rate: 1.0
         noise_type: 'symmetric'
-        seed: 98
+        seed: 13
       - set: 'Train'
         noise_rate: 1.0
         noise_type: 'symmetric'
-        seed: 1
+        seed: 17
 
 
 dataset:
   name: "clothing1M"
   num_classes: &num_classes 14
   img_size: [224, 224]
-  batch_size: 256
+  batch_size: 64
   valset_ratio: 0.0
   num_workers: 12
   seed: *dataset_seed
@@ -39,8 +39,9 @@ model:
 
 
 trainer:
+
   mix:
-    max_iterations: 150000
+    max_iterations: 20
     optimizer_cfg: 
       type: "adamw"
       lr: 1.0e-5
@@ -48,9 +49,9 @@ trainer:
     lr_schedule_cfg:
       type: 'cosann_warmup'
       update_on: 'gradient_step'
-      warmup_steps: 1000
-      hold_steps: 79000
-      T_max: 150000
+      warmup_steps: 2
+      hold_steps: 2
+      T_max: 20
       eta_min: 0
     early_stopping: False
     validation_freq: -1
@@ -62,7 +63,7 @@ trainer:
     comet_project_name: 'dino-realworld-TA'
     seed: *training_seed
   proxy:
-    max_iterations: 500
+    max_iterations: 20
     optimizer_cfg: 
       type: "adamw"
       lr: 1.0e-5
@@ -70,9 +71,9 @@ trainer:
     lr_schedule_cfg:
       type: 'cosann_warmup'
       update_on: 'gradient_step'
-      warmup_steps: 100
-      hold_steps: 300
-      T_max: 500
+      warmup_steps: 2
+      hold_steps: 2
+      T_max: 20
       eta_min: 0
     early_stopping: False
     validation_freq: -1
@@ -86,7 +87,7 @@ trainer:
 
 
   CF:
-    max_iterations: 500
+    max_iterations: 20
     optimizer_cfg: 
       type: "adamw" 
       lr: 1.0e-5
@@ -94,9 +95,9 @@ trainer:
     lr_schedule_cfg:
       type: 'cosann_warmup'
       update_on: 'gradient_step'
-      warmup_steps: 100
-      hold_steps: 200
-      T_max: 500
+      warmup_steps: 2
+      hold_steps: 2
+      T_max: 20
       eta_min: 0
     early_stopping: False
     validation_freq: -1

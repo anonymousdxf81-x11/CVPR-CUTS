@@ -45,8 +45,9 @@ To run for a customized configuration, create a yaml file inside `configs` direc
 ```bash
 python run_experiment.py --experiment <noise or poison> --arch <clip or dino or regular> --config <config name> --finetune --tv --sap or --potion
 ```
-to run with Pytorch DDP
+
+if you are running for a real-world dataset like `Clothing1M`, use with `--real-world` and to run with Pytorch DDP
 ```bash
-CUDA_VISIBLE_DEVICES=<gpu IDs> torchrun --nproc_per_node=<num processes> run_experiment.py ...
+CUDA_VISIBLE_DEVICES=<gpu IDs> torchrun --nproc_per_node=<num processes> run_experiment.py -e noise -a dino --real-world -c <config name> -f -t
 ```
 
