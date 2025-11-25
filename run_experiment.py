@@ -864,7 +864,7 @@ def apply_tv_realworld(experiment_type:str, architecture:str, outputs_dir: Path,
 
 
 # SAP only works for label noise and fails for poison trigger
-def apply_SAP(experiment_type:str, architecture:str, outputs_dir: Path, results_dir: Path, cfg: dict, cfg_name:str):
+def apply_SAP(experiment_type:str, architecture:str, outputs_dir: Path, results_dir: Path, cfg: dict, cfg_name:str, is_real_world:bool=False):
     if architecture == 'dino':
         raise ValueError('SAP is not implemented for DINOv3 architecture.')
     training_seed = cfg['training_seed']
@@ -903,7 +903,8 @@ def apply_SAP(experiment_type:str, architecture:str, outputs_dir: Path, results_
     if experiment_type == 'poison':
         dataset_clean = copy.deepcopy(base_dataset)
         dataset_corrupted = copy.deepcopy(base_dataset)
-        dataset_corrupted.inject_poison(**strategy['corruption']['mix'])
+        if not is_real_world:
+            dataset_corrupted.inject_poison(**strategy['corruption']['mix'])
         
         proxy_conf = strategy['corruption']['proxy'][0]
         proxy_conf['set'] = 'Heldout'
@@ -915,18 +916,16 @@ def apply_SAP(experiment_type:str, architecture:str, outputs_dir: Path, results_
     elif experiment_type == 'noise':
         dataset_clean = copy.deepcopy(base_dataset)
         dataset_corrupted = copy.deepcopy(base_dataset)
-        dataset_corrupted.inject_noise(**strategy['corruption']['mix'])
+        
+        if not is_real_world:
+            dataset_corrupted.inject_noise(**strategy['corruption']['mix'])
         
         proxy_conf = strategy['corruption']['proxy'][0]
         proxy_conf['set'] = 'Heldout'
         dataset_corrupted.inject_noise(**proxy_conf)
         
                 
-    
-    
-    
-    
-    
+
     # Load weights while removing classifier head's weights from the state dict for CLIP
     mix_weights = OrderedDict(
     (k, v) for k, v in torch.load(
@@ -976,7 +975,7 @@ def apply_SAP(experiment_type:str, architecture:str, outputs_dir: Path, results_
 
 
 # Potion only works for poison triggers and fails for label noise
-def apply_potion(experiment_type:str, architecture:str, outputs_dir: Path, results_dir: Path, cfg: dict, cfg_name:str):
+def apply_potion(experiment_type:str, architecture:str, outputs_dir: Path, results_dir: Path, cfg: dict, cfg_name:str, is_real_world:bool=False):
     
     training_seed = cfg['training_seed']
     dataset_seed = cfg['dataset_seed']
@@ -1014,7 +1013,9 @@ def apply_potion(experiment_type:str, architecture:str, outputs_dir: Path, resul
     
     dataset_clean = copy.deepcopy(base_dataset)
     dataset_corrupted = copy.deepcopy(base_dataset)
-    dataset_corrupted.inject_poison(**strategy['corruption']['mix'])
+    
+    if not is_real_world:
+        dataset_corrupted.inject_poison(**strategy['corruption']['mix'])
     
     proxy_conf = strategy['corruption']['proxy'][0]
     proxy_conf['set'] = 'Heldout'
@@ -1066,8 +1067,10 @@ def apply_potion(experiment_type:str, architecture:str, outputs_dir: Path, resul
     metrics_ho, _, _ = evaluate_model(corrected_model, dataset_corrupted.get_heldout_dataloader(), gpu)
     print(metrics_ho)
     
-    metrics_train = eval_model_on_clean_corrupted_splits(corrected_model, None, dataset_corrupted, gpu)
-    print(metrics_train)
+    metrics_train = {}
+    if not is_real_world:
+        metrics_train = eval_model_on_clean_corrupted_splits(corrected_model, None, dataset_corrupted, gpu)
+        print(metrics_train)
     
     results_dict['test'] = metrics_test
     results_dict['ho'] = metrics_ho
@@ -1161,7 +1164,7 @@ def main():
     
     
     if args.real_world:
-        expr_arch = Path(f"{args.arch}_realworld_TA")
+        expr_arch = Path(f"realworld_TA")
     else:
         expr_arch = Path(f"{args.arch}_{args.experiment}_TA")
     
@@ -1190,11 +1193,11 @@ def main():
             apply_tv(args.experiment, args.arch, outputs_dir, results_dir, cfg, cfg_name=cfg_path.stem, do_full_grid_results=args.full_grid_results)
     
     if args.sap:
-        apply_SAP(args.experiment, args.arch, outputs_dir, results_dir, cfg, cfg_name=cfg_path.stem)
+        apply_SAP(args.experiment, args.arch, outputs_dir, results_dir, cfg, cfg_name=cfg_path.stem, is_real_world=args.real_world)
 
     
     if args.potion:
-        apply_potion(args.experiment, args.arch, outputs_dir, results_dir, cfg, cfg_name=cfg_path.stem)
+        apply_potion(args.experiment, args.arch, outputs_dir, results_dir, cfg, cfg_name=cfg_path.stem, is_real_world=args.real_world)
 
 if __name__ == "__main__":
     main()
