@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 ## Models and Datasets
 
-We use MNIST, CIFAR10, CIFAR100, and Clothing1M.
+We use MNIST, CIFAR10, CIFAR100, and Clothing1M:
 
 - MNIST / CIFAR10 / CIFAR100 are downloaded automatically by `torchvision`.
 - Clothing1M: will be downloaded from `openxlab`. For this you will need to add `OPENXLAB_AK` and `OPENXLAB_SK` in a file named `.env` in the root directory of the workspace:
