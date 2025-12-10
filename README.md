@@ -51,7 +51,7 @@ We use MNIST, CIFAR10, CIFAR100, and Clothing1M:
     OPENXLAB_SK=<your openxlab SK>
     ```
 
-For CLIP we use the official implementation form [OpenAI CLIP](https://github.com/openai/CLIP). For DINOv3 we use [Facebook Huggingface](https://huggingface.co/facebook/dinov3-vitb16-pretrain-lvd1689m) and the weights are downloaded automatically if `HF_TOKEN` is provided in `.env`. Other models use weights from `torchvision` model hub (if initialized with pre-trained weights.)
+For CLIP we use the official implementation form [OpenAI CLIP](https://github.com/openai/CLIP). For DINOv3 we use [Facebook Huggingface](https://huggingface.co/facebook/dinov3-vitb16-pretrain-lvd1689m) and the weights are downloaded automatically if `HF_TOKEN` is provided in `.env`. Other models use weights from `torchvision` model hub (if initialized with pre-trained weights).
 
 
 
